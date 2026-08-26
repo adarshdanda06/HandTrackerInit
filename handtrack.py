@@ -52,6 +52,19 @@ while True:
         cx, cy = x + bw // 2, y + bh // 2
         cv2.circle(frame, (cx, cy), 4, (0, 0, 255), -1)
 
+        # palm center: mean of wrist + 4 knuckles (rigid, ignores finger motion)
+        PALM = [0, 5, 9, 13, 17]
+        tx = sum(pts[i][0] for i in PALM) / len(PALM)
+        ty = sum(pts[i][1] for i in PALM) / len(PALM)
+        cv2.circle(frame, (int(tx), int(ty)), 6, (255, 0, 255), -1)
+
+        # error of the hand from frame center -> drives the pan/tilt motors
+        frame_cx = w / 2
+        frame_cy = h / 2
+        err_x = tx - frame_cx  # + : hand is right of center  -> pan right
+        err_y = ty - frame_cy  # + : hand is below center     -> tilt down
+        print(f'err_x: {err_x}')
+        print(f'err_y: {err_y}')
     cv2.imshow("Hand tracking", frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
